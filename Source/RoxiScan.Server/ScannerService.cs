@@ -1,61 +1,38 @@
-﻿using System;
+﻿using RoxiScan.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using WIA;
-using PdfSharp.Pdf;
 using System.IO;
-using RoxiScan.Model;
 
 namespace RoxiScan.Server
 {
     public class ScannerService : IScanner
     {
-        public GetScannerInfoResponse GetScannerInfo()
+        public IEnumerable<Scanner> GetScannerInfo()
         {
-            GetScannerInfoResponse response = new GetScannerInfoResponse();
-
-            DeviceManager manager = new DeviceManager();
-            foreach (DeviceInfo info in manager.DeviceInfos)
+            try
             {
-                if (info.Type == WiaDeviceType.ScannerDeviceType)
-                {
-                    Console.WriteLine("Scanner");
-                    string deviceId = info.DeviceID;
-                    string deviceName = null;
-                    foreach (Property item in info.Properties)
-                    {
-                        if (item.Name == "Description")
-                            deviceName = item.get_Value();
-                    }
-
-                    Console.WriteLine(deviceId);
-                    Console.WriteLine(deviceName);
-                    if (deviceName != null)
-                    {
-                        GetScannerInfoResponse.Scanner scanner = new GetScannerInfoResponse.Scanner();
-                        scanner.DeviceId = deviceId;
-                        scanner.DeviceName = deviceName;
-
-                        response.Scanners.Add(scanner);
-                    }
-
-                }
+                var svc = new RoxiScan.ScanInfoService();
+                return svc.GetScanners();
             }
-
-            return response;
+            catch (Exception ex)
+            {
+                throw ScanError.Fault("Error retrieving list of scanners.", ex);
+            }
         }
 
         public System.IO.Stream Scan(ScanRequest request)
         {
-            ScanAdapter adapter = new ScanAdapter(request.DeviceId, request.PaperSize, request.ScanSource);
-            PdfDocument pdfDoc = adapter.ScanToPDF();
-
-            var response = new MemoryStream();
-            pdfDoc.Save(response, false);
-
-            response.Seek(0, SeekOrigin.Begin);
-            return response;
+            try
+            {
+                ScanToPDF svc = new ScanToPDF();
+                var pdfDocStream = svc.Scan(request.DeviceId, request.Settings);
+                pdfDocStream.Seek(0, SeekOrigin.Begin);
+                return pdfDocStream;
+            }
+            catch (Exception ex)
+            {
+                throw ScanError.Fault("Error during scan.", ex);
+            }
         }
     }
 }

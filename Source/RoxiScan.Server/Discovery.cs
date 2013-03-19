@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Net.Sockets;
 using System.Net;
-using System.ServiceModel.Discovery;
-using System.ServiceModel;
-using System.Diagnostics;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace RoxiScan.Server
 {

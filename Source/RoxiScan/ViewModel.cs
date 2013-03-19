@@ -7,38 +7,26 @@ using System.ComponentModel;
 using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using RoxiScan.Model;
+using RoxiScan.Models;
 using System.Threading.Tasks;
 
 namespace RoxiScan
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private Binding binding;
-        private EndpointAddress address;
-
         public ViewModel()
         {
-            this.address = Helper.DiscoverAddress<IScanner>();
-            this.binding = Helper.CreateBinding();
             this.GetScannerList();
-
-            this.PaperSizes.Add("Letter");
-            this.PaperSizes.Add("Legal");
-            this.PaperSize = "Letter";
-            this.ScanSources.Add("Flatbed");
-            this.ScanSources.Add("Feeder");
-            this.ScanSource = "Flatbed";
         }
 
-        private readonly ObservableCollection<GetScannerInfoResponse.Scanner> scanners = new ObservableCollection<GetScannerInfoResponse.Scanner>();
-        public ObservableCollection<GetScannerInfoResponse.Scanner> Scanners
+        private readonly ObservableCollection<Scanner> scanners = new ObservableCollection<Scanner>();
+        public ObservableCollection<Scanner> Scanners
         {
             get { return scanners; }
         }
 
-        private GetScannerInfoResponse.Scanner scanner;
-        public GetScannerInfoResponse.Scanner Scanner
+        private Scanner scanner;
+        public Scanner Scanner
         {
             get { return scanner; }
             set
@@ -47,60 +35,6 @@ namespace RoxiScan
                 {
                     scanner = value;
                     RaisePropertyChanged("Scanner");
-                }
-            }
-        }
-
-        private readonly ObservableCollection<string> papersizes = new ObservableCollection<string>();
-        public ObservableCollection<string> PaperSizes
-        {
-            get { return papersizes; }
-        }
-
-        private string papersize;
-        public string PaperSize
-        {
-            get { return papersize; }
-            set
-            {
-                if (papersize != value)
-                {
-                    papersize = value;
-                    RaisePropertyChanged("PaperSize");
-                }
-            }
-        }
-
-        private readonly ObservableCollection<string> scansources = new ObservableCollection<string>();
-        public ObservableCollection<string> ScanSources
-        {
-            get { return scansources; }
-        }
-
-        private string scansource;
-        public string ScanSource
-        {
-            get { return scansource; }
-            set
-            {
-                if (scansource != value)
-                {
-                    scansource = value;
-                    RaisePropertyChanged("ScanSource");
-                }
-            }
-        }
-
-        private string filename;
-        public string Filename
-        {
-            get { return filename; }
-            set
-            {
-                if (filename != value)
-                {
-                    filename = value;
-                    RaisePropertyChanged("Filename");
                 }
             }
         }
@@ -129,20 +63,40 @@ namespace RoxiScan
 
         public void GetScannerList()
         {
-            IScanner proxy = ChannelFactory<IScanner>.CreateChannel(binding, address);
-            var response = proxy.GetScannerInfo();
-            (proxy as ICommunicationObject).Close();
-
-            if (response.Scanners != null)
+            IScanner proxy = DiscoveryHelper.CreateDiscoveryProxy();
+            try
             {
+                var response = proxy.GetScannerInfo();
+
                 this.Scanners.Clear();
-                foreach (var item in response.Scanners)
+                foreach (var item in response)
                 {
                     this.Scanners.Add(item);
                 }
                 if (this.Scanners.Count > 0)
                 {
                     this.Scanner = this.Scanners[0];
+                }
+            }
+            catch (FaultException<ScanError> e)
+            {
+                this.Status = e.Detail.ErrorMessage;
+            }
+            catch (CommunicationException)
+            {
+
+            }
+            finally
+            {
+                ICommunicationObject comm = ((ICommunicationObject)proxy);
+
+                if (comm.State == CommunicationState.Faulted)
+                {
+                    comm.Abort();
+                }
+                else
+                {
+                    comm.Close();
                 }
             }
         }
@@ -152,27 +106,56 @@ namespace RoxiScan
             this.Status = string.Empty;
             var request = new ScanRequest()
             {
-                DeviceId = this.Scanner.DeviceId,
-                PaperSize = this.PaperSize,
-                ScanSource = this.ScanSource
+                DeviceId = this.Scanner.Device.DeviceId,
+                Settings = new ScannerSettings
+                {
+                    PageSize = PageSizes.Letter,
+                    ColorDepth = ColorDepths.BlackAndWhite,
+                    Orientation = Orientations.Portrait,
+                    Resolution = Resolutions.R300,
+                    UseAutomaticDocumentFeeder = false
+                }
             };
 
-            //var client = new ScannerClient();
-            var client = new ScannerDiscoveryClient();
-            var response = client.Scan(request);
-
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Document";
-            dlg.DefaultExt = ".pdf";
-            dlg.Filter = "Acrobat|*.pdf";
-
-            var result = dlg.ShowDialog();
-
-            if (result == true)
+            IScanner proxy = DiscoveryHelper.CreateDiscoveryProxy();
+            try
             {
-                using (var file = dlg.OpenFile())
+                var response = proxy.Scan(request);
+
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = "Document";
+                dlg.DefaultExt = ".pdf";
+                dlg.Filter = "Acrobat|*.pdf";
+
+                var result = dlg.ShowDialog();
+
+                if (result == true)
                 {
-                    CopyStream(response, file);
+                    using (var file = dlg.OpenFile())
+                    {
+                        CopyStream(response, file);
+                    }
+                }
+            }
+            catch (FaultException<ScanError> e)
+            {
+                this.Status = e.Detail.ErrorMessage;
+            }
+            catch (CommunicationException)
+            {
+
+            }
+            finally
+            {
+                ICommunicationObject comm = ((ICommunicationObject)proxy);
+
+                if (comm.State == CommunicationState.Faulted)
+                {
+                    comm.Abort();
+                }
+                else
+                {
+                    comm.Close();
                 }
             }
         }

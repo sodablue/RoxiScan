@@ -8,7 +8,7 @@ using System.ServiceModel.Channels;
 
 namespace RoxiScan
 {
-    public static class Helper
+    public static class DiscoveryHelper
     {
         public static EndpointAddress DiscoverAddress<T>(Uri scope = null)
         {
@@ -33,6 +33,11 @@ namespace RoxiScan
             binding.MaxReceivedMessageSize = 1000000;
 
             return binding;
+        }
+
+        public static IScanner CreateDiscoveryProxy()
+        {
+            return ChannelFactory<IScanner>.CreateChannel(CreateBinding(), DiscoverAddress<IScanner>());
         }
     }
 }

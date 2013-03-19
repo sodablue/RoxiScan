@@ -20,11 +20,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Content="Select Scanner" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" />
-                <ComboBox Grid.Row="0" Grid.Column="1" Height="23" Name="Scanner" VerticalAlignment="Top" Width="383" DisplayMemberPath="DeviceName" ItemsSource="{Binding Path=Scanners}" SelectedItem="{Binding Path=Scanner,Mode=TwoWay}" />
-                <Label Grid.Row="1" Grid.Column="0" Content="Paper Size" />
-                <ComboBox Grid.Row="1" Grid.Column="1" Name="PaperSize" Margin="0,0,0,4" Width="383" ItemsSource="{Binding Path=PaperSizes}" SelectedItem="{Binding Path=PaperSize,Mode=TwoWay}"/>
-                <Label Grid.Row="2" Grid.Column="0" Content="Scan Source" />
-                <ComboBox Grid.Row="2" Grid.Column="1" Name="ScanSource" Margin="0,0,0,4" Width="383" ItemsSource="{Binding Path=ScanSources}" SelectedItem="{Binding Path=ScanSource,Mode=TwoWay}"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" Height="23" Name="Scanner" VerticalAlignment="Top" Width="383" DisplayMemberPath="Name" ItemsSource="{Binding Path=Scanners}" SelectedItem="{Binding Path=Scanner,Mode=TwoWay}" />
 
                 <Button Grid.Row="6" Grid.Column="0" Content="Scan" Margin="0,0,0,4" Height="23" HorizontalAlignment="Left" Name="ScanButton" VerticalAlignment="Center" Width="75" Click="ScanButton_Click" />
                 <Label Grid.Row="6" Grid.Column="1" Content="{Binding Status}" Foreground="Red" />

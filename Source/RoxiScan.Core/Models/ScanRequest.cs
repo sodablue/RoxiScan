@@ -5,12 +5,14 @@ using System.Text;
 using System.ServiceModel;
 using System.Runtime.Serialization;
 
-namespace RoxiScan.Model
+namespace RoxiScan.Models
 {
+    [DataContract]
     public class ScanRequest
     {
+        [DataMember]
         public string DeviceId { get; set; }
-        public string PaperSize { get; set; }
-        public string ScanSource { get; set; }
+        [DataMember]
+        public ScannerSettings Settings { get; set; }
     }
 }
