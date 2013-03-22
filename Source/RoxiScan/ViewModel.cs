@@ -9,14 +9,17 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using RoxiScan.Models;
 using System.Threading.Tasks;
+using RoxiScan.Commands;
 
 namespace RoxiScan
 {
     public class ViewModel : INotifyPropertyChanged
     {
+        private GetScannerListCommand getScannerListCommand = new GetScannerListCommand();
+
         public ViewModel()
         {
-            this.GetScannerList();
+            getScannerListCommand.Execute(this);
         }
 
         private readonly ObservableCollection<Scanner> scanners = new ObservableCollection<Scanner>();
@@ -61,113 +64,10 @@ namespace RoxiScan
             if (changed != null) changed(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void GetScannerList()
-        {
-            IScanner proxy = DiscoveryHelper.CreateDiscoveryProxy();
-            try
-            {
-                var response = proxy.GetScannerInfo();
 
-                this.Scanners.Clear();
-                foreach (var item in response)
-                {
-                    this.Scanners.Add(item);
-                }
-                if (this.Scanners.Count > 0)
-                {
-                    this.Scanner = this.Scanners[0];
-                }
-            }
-            catch (FaultException<ScanError> e)
-            {
-                this.Status = e.Detail.ErrorMessage;
-            }
-            catch (CommunicationException)
-            {
 
-            }
-            finally
-            {
-                ICommunicationObject comm = ((ICommunicationObject)proxy);
 
-                if (comm.State == CommunicationState.Faulted)
-                {
-                    comm.Abort();
-                }
-                else
-                {
-                    comm.Close();
-                }
-            }
-        }
 
-        public void Scan()
-        {
-            this.Status = string.Empty;
-            var request = new ScanRequest()
-            {
-                DeviceId = this.Scanner.Device.DeviceId,
-                Settings = new ScannerSettings
-                {
-                    PageSize = PageSizes.Letter,
-                    ColorDepth = ColorDepths.BlackAndWhite,
-                    Orientation = Orientations.Portrait,
-                    Resolution = Resolutions.R300,
-                    UseAutomaticDocumentFeeder = false
-                }
-            };
 
-            IScanner proxy = DiscoveryHelper.CreateDiscoveryProxy();
-            try
-            {
-                var response = proxy.Scan(request);
-
-                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-                dlg.FileName = "Document";
-                dlg.DefaultExt = ".pdf";
-                dlg.Filter = "Acrobat|*.pdf";
-
-                var result = dlg.ShowDialog();
-
-                if (result == true)
-                {
-                    using (var file = dlg.OpenFile())
-                    {
-                        CopyStream(response, file);
-                    }
-                }
-            }
-            catch (FaultException<ScanError> e)
-            {
-                this.Status = e.Detail.ErrorMessage;
-            }
-            catch (CommunicationException)
-            {
-
-            }
-            finally
-            {
-                ICommunicationObject comm = ((ICommunicationObject)proxy);
-
-                if (comm.State == CommunicationState.Faulted)
-                {
-                    comm.Abort();
-                }
-                else
-                {
-                    comm.Close();
-                }
-            }
-        }
-
-        private void CopyStream(Stream input, Stream output)
-        {
-            byte[] buffer = new byte[8 * 1024];
-            int len;
-            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                output.Write(buffer, 0, len);
-            }
-        }
     }
 }

@@ -47,10 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScanDevice.cs" />
     <Compile Include="ScanException.cs" />
     <Compile Include="ScanInfoService.cs" />
-    <Compile Include="ScanManager.cs" />
-    <Compile Include="ScanToPDF.cs" />
+    <Compile Include="ScanToPDFService.cs" />
     <Compile Include="WiaDef.cs" />
   </ItemGroup>
   <ItemGroup>

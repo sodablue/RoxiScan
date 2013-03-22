@@ -63,26 +63,6 @@ namespace RoxiScan
         public const uint ADVANCED_DUPLEX = 0x400;
     }
 
-    public class WIA_DPS_PAGE_SIZE
-    {
-        //
-        // WIA_DPS_PAGE_SIZE/WIA_IPS_PAGE_SIZE constants
-        // Dimensions are defined as (WIDTH x HEIGHT) in 1/1000ths of an inch
-        //
-        public const uint WIA_PAGE_LETTER = 1; //  8500 x 11000
-        public const uint WIA_PAGE_USLEGAL = 3; //  8500 x 14000
-
-        //
-        // ISO A page size constants
-        //
-
-        public const uint WIA_PAGE_ISO_A3 = 10; // 11692 x 16535
-        public const uint WIA_PAGE_ISO_A4 = 0; //  8267 x 11692
-        public const uint WIA_PAGE_ISO_A5 = 11; //  5826 x  8267
-        public const uint WIA_PAGE_ISO_A6 = 12; //  4133 x  5826
-        public const uint WIA_PAGE_AUTO = 100;
-    }
-
     public class WIA_IMAGE_FORMAT
     {
         public const string BMP = "{B96B3CAB-0728-11D3-9D7B-0000F81EF32E}";

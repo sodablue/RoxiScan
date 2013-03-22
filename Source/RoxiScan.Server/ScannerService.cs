@@ -14,9 +14,13 @@ namespace RoxiScan.Server
                 var svc = new RoxiScan.ScanInfoService();
                 return svc.GetScanners();
             }
-            catch (Exception ex)
+            catch (ScanException se)
             {
-                throw ScanError.Fault("Error retrieving list of scanners.", ex);
+                throw ScanError.Fault(se.Message, se);
+            }
+            catch (Exception e)
+            {
+                throw ScanError.Fault("Error retrieving list of scanners.", e);
             }
         }
 
@@ -24,14 +28,18 @@ namespace RoxiScan.Server
         {
             try
             {
-                ScanToPDF svc = new ScanToPDF();
-                var pdfDocStream = svc.Scan(request.DeviceId, request.Settings);
+                ScanToPDFService svc = new ScanToPDFService(request.DeviceId, request.Settings);
+                var pdfDocStream = svc.CreatePDF();
                 pdfDocStream.Seek(0, SeekOrigin.Begin);
                 return pdfDocStream;
             }
-            catch (Exception ex)
+            catch (ScanException se)
             {
-                throw ScanError.Fault("Error during scan.", ex);
+                throw ScanError.Fault(se.Message, se);
+            }
+            catch (Exception e)
+            {
+                throw ScanError.Fault("Error during scan.", e);
             }
         }
     }

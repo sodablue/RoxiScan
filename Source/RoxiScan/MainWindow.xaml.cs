@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RoxiScan.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,15 +36,9 @@ namespace RoxiScan
             if (this.DataContext == null) this.DataContext = new ViewModel();
             var viewModel = this.DataContext as ViewModel;
 
-            viewModel.Scan();
-        }
+            ScanCommand scanCommand = new ScanCommand();
 
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.DataContext == null) this.DataContext = new ViewModel();
-            var viewModel = this.DataContext as ViewModel;
-
-            viewModel.GetScannerList();            
+            scanCommand.Execute(viewModel);
         }
     }
 }

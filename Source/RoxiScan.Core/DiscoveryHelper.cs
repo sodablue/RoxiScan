@@ -30,7 +30,10 @@ namespace RoxiScan
         {
             var binding = new NetTcpBinding();
             binding.TransferMode = TransferMode.StreamedResponse;
-            binding.MaxReceivedMessageSize = 1000000;
+            binding.MaxReceivedMessageSize = 500000000;
+            binding.MaxBufferSize = 500000000;
+            binding.ReceiveTimeout = new TimeSpan(0, 5, 0);
+            binding.SendTimeout = new TimeSpan(0, 5, 0);
 
             return binding;
         }

@@ -42,13 +42,5 @@ namespace RoxiScan
                 };
             }
         }
-
-        public DeviceInfo GetDeviceInfo(string deviceId)
-        {
-            return GetDevices()
-                .Where(s => s.Type == WiaDeviceType.ScannerDeviceType)
-                .Where(s => s.DeviceID == deviceId)
-                .SingleOrDefault();
-        }
     }
 }
